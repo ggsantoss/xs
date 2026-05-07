@@ -2,6 +2,8 @@
 
 > “Linguagem experimental com sintaxe em português que transpila para JS e executa em ambiente isolado.”
 
+
+
 Ela possui:
 
 * Lexer próprio
@@ -16,6 +18,11 @@ Ela possui:
 * Execução isolada
 
 Tudo escrito em JavaScript.
+
+## 🚀 Playground
+
+[![Open Playground](https://img.shields.io/badge/Playground-Acessar-ff0077?style=for-the-badge)](https://xanascript.xyz)
+
 
 ---
 
