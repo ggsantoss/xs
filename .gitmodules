@@ -1,0 +1,3 @@
+[submodule ".github-org"]
+	path = .github-org
+	url = https://github.com/xanascr/.github.git
