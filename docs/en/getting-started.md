@@ -6,14 +6,12 @@ XanaScript is a programming language with Portuguese syntax, an optimizing compi
 
 ### Via npm (requires Node.js)
 
+Works on Windows, Linux, and macOS.
+
 ```bash
 npm install -g xanascript
 xs run app.xs
 ```
-
-### Via installer (Windows)
-
-Download `xs-install.exe` from [releases](https://github.com/xanascr/xs-installer/releases) and run it. It installs everything and configures PATH automatically.
 
 ### Via source
 

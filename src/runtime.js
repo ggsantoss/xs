@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import http from "http";
-import axios from "axios";
+
 
 import { lex } from "./lexer.js";
 import { parse } from "./parser.js";
@@ -37,8 +37,8 @@ export function createEnv(baseDir) {
 
     AGORA_VAI: async url => {
       try {
-        const res = await axios.get(url, { timeout: 3000 });
-        return res.data;
+        const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
+        return await res.json();
       } catch (e) {
         throw new XSError(`Falha em AGORA_VAI("${url}"): ${e.message}`, {
           hint: "Verifique se a URL está correta e acessível",

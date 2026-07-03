@@ -6,14 +6,12 @@ XanaScript e uma linguagem de programacao com sintaxe em portugues, compilador o
 
 ### Via npm (requer Node.js)
 
+Funciona no Windows, Linux e macOS.
+
 ```bash
 npm install -g xanascript
 xs run app.xs
 ```
-
-### Via instalador (Windows)
-
-Baixe o `xs-install.exe` em [releases](https://github.com/xanascr/xs-installer/releases) e execute-o. Ele instala tudo e configura o PATH automaticamente.
 
 ### Via codigo-fonte
 

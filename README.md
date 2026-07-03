@@ -45,7 +45,6 @@ dist/xs run app.xs
 - [Documentacao completa](docs/pt-br/comecando.md) - Portugues
 - [Documentacion completa](docs/es/introduccion.md) - Espanol
 - [Examples](https://github.com/xanascr/xs-examples)
-- [Installer](https://github.com/xanascr/xs-installer)
 - [VS Code Extension](https://github.com/xanascr/xs-vscode)
 - [LLM Reference](llms.txt) - Complete reference for AI assistants
 
@@ -129,4 +128,4 @@ xs/
 | [xanascript/xs-site](https://github.com/xanascr/xs-site) | Website and documentation |
 | [xanascript/xs-vscode](https://github.com/xanascr/xs-vscode) | VS Code extension |
 | [xanascript/xs-examples](https://github.com/xanascr/xs-examples) | Code examples |
-| [xanascript/xs-installer](https://github.com/xanascr/xs-installer) | Windows installer |
+
