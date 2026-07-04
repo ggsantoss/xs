@@ -172,6 +172,7 @@ export function lex(input, file = "input.xs") {
     if ([
       "=>", "&&", "||", "==", "!=", ">=", "<=",
       "+=", "-=", "*=", "/=", "%=", "->", "~=",
+      "++", "--",
       "//", "/*",
     ].includes(two)) {
       push({ type: two, value: two });

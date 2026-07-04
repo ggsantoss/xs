@@ -620,6 +620,9 @@ export function parse(tokens) {
                 const index = parseExpr();
                 expect("]");
                 expr = A.IndexExpr(expr, index);
+            } else if (peek().type === "++" || peek().type === "--") {
+                const op = next().type;
+                expr = A.UpdateExpr(op, expr, false);
             } else break;
         }
         return expr;

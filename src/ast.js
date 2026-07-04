@@ -36,6 +36,7 @@ export const WhileStmt = (test, body) => ({ type: "WhileStmt", test, body, loc: 
 export const BreakStmt = () => ({ type: "BreakStmt", loc: loc() });
 export const ContinueStmt = () => ({ type: "ContinueStmt", loc: loc() });
 export const Ternary = (test, cons, alt) => ({ type: "Ternary", test, cons, alt, loc: loc() });
+export const UpdateExpr = (op, arg, prefix) => ({ type: "UpdateExpr", op, arg, prefix, loc: loc() });
 
 export const ClassDecl = (name, superClass, methods) => ({ type: "ClassDecl", name, superClass, methods, loc: loc() });
 export const Method = (name, params, body, isConstructor) => ({ type: "Method", name, params, body, isConstructor, loc: loc() });

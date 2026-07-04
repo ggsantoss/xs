@@ -73,6 +73,21 @@ export async function interpret(node, env) {
       }
       return env[node.name];
     }
+    case "UpdateExpr": {
+      const v = await interpret(node.arg, env);
+      const nv = node.op === "++" ? v + 1 : v - 1;
+      if (node.arg.type === "Ident") {
+        env[node.arg.name] = nv;
+      } else if (node.arg.type === "Member") {
+        const obj = await interpret(node.arg.obj, env);
+        obj[node.arg.prop] = nv;
+      } else if (node.arg.type === "IndexExpr") {
+        const obj = await interpret(node.arg.obj, env);
+        const idx = await interpret(node.arg.index, env);
+        obj[idx] = nv;
+      }
+      return node.prefix ? nv : v;
+    }
     case "Unary": {
       const v = await interpret(node.arg, env);
       switch (node.op) {
