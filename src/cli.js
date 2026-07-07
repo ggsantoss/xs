@@ -195,7 +195,7 @@ if (!cmd || cmd === "help") {
     }
     if (taskRan) return;
 
-    const file = rest[0];
+    const file = rest[0] || (cmd.endsWith(".xs") ? cmd : null);
     if (!file) {
       console.log("Especifique um arquivo .xs");
       process.exit(1);

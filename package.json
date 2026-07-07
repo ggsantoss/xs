@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "xanascript",
   "version": "2.2.2",
   "description": "Programming language with Portuguese syntax, optimizing compiler, built-in ORM, and WebAssembly support",
@@ -39,3 +39,4 @@
     "VERSION"
   ]
 }
+
