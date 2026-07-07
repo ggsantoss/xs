@@ -1,0 +1,19 @@
+{
+  "name": "base64",
+  "version": "1.0.0",
+  "description": "Base64 encode/decode for XanaScript (strings and bytes)",
+  "main": "base64.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./base64.js"
+    }
+  },
+  "xs": {
+    "name": "base64",
+    "version": "1.0.0",
+    "description": "Base64 encode/decode for strings and files",
+    "license": "MIT",
+    "author": "xanascr"
+  }
+}

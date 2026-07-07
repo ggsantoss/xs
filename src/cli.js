@@ -11,6 +11,10 @@ import { generate } from "./codegen.js";
 import { setSource, XSError, formatError } from "./errors.js";
 import { interpret, AssertionError } from "./interpreter.js";
 import { createEnv } from "./runtime.js";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const VERSION = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"), "utf-8")).version;
 
 const [, , cmd, ...rest] = process.argv;
 
@@ -50,6 +54,11 @@ TAREFAS:
 
   xs help                Mostra ajuda
 `;
+
+if (cmd === "-v" || cmd === "--version" || cmd === "version") {
+  console.log("XanaScript v" + VERSION);
+  process.exit(0);
+}
 
 if (!cmd || cmd === "help") {
   console.log(HELP);
