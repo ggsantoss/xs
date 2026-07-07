@@ -294,6 +294,12 @@ if (!cmd || cmd === "help") {
       return;
     }
 
+    // Default: run the .xs file
+    if (file) {
+      await runXS(code, path.dirname(path.resolve(file)), file);
+      return;
+    }
+
     console.log(`Comando desconhecido: ${cmd}`);
     console.log(HELP);
   } catch (e) {
