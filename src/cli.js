@@ -13,7 +13,7 @@ import { interpret, AssertionError } from "./interpreter.js";
 import { createEnv } from "./runtime.js";
 import { fileURLToPath } from "url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const VERSION = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"), "utf-8")).version;
 
 const [, , cmd, ...rest] = process.argv;
