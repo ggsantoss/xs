@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import http from "http";
+import os from "os";
 
 
 import { lex } from "./lexer.js";
@@ -118,8 +119,17 @@ export function createEnv(baseDir) {
       if (mod.startsWith(".") || mod.startsWith("/")) {
         full = path.resolve(baseDir, mod);
       } else {
-        full = mod;
-        return await importNodeModule(mod);
+        // Check xs package cache first
+        const xsPkgDir = path.join(os.homedir(), ".xs", "packages", mod);
+        const xsPkgFile = path.join(xsPkgDir, "xspack.json");
+        if (fs.existsSync(xsPkgFile)) {
+          const pkgMeta = JSON.parse(fs.readFileSync(xsPkgFile, "utf-8"));
+          full = path.resolve(xsPkgDir, pkgMeta.main || "src/index.xs");
+          if (!fs.existsSync(full)) full = path.resolve(xsPkgDir, "src/index.xs");
+        } else {
+          full = mod;
+          return await importNodeModule(mod);
+        }
       }
       if (CACHE.has(full)) {
         return CACHE.get(full);
