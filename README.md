@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://xanascript.xyz/logo.svg" width="120" alt="XanaScript">
+  <img src="https://avatars.githubusercontent.com/u/299560478?s=48&v=4" width="120" alt="XanaScript">
   <h1 align="center">XanaScript</h1>
   <p align="center">A programming language with Portuguese syntax, optimizing compiler, built-in ORM, and native WebAssembly support.</p>
   <p align="center">
