@@ -513,8 +513,8 @@ function __xs_require(mod) {
       __xs_loading.delete(full);
       return m;
     }
-    const fn = new Function("require", "__exports", "__dirname", code);
-    fn(require, exports, require("path").dirname(full));
+    const vm = require("vm");
+    vm.runInNewContext(code, { require, __exports: exports, __dirname: require("path").dirname(full), console, process, Buffer, setTimeout, setInterval, clearTimeout, clearInterval, Promise }, { filename: full });
     __xs_cache.set(full, exports);
     __xs_loading.delete(full);
     return exports;

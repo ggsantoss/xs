@@ -1,5 +1,11 @@
 import { expandMacros } from "./macros.js";
 
+function fold(node, overrides) {
+  const result = { ...overrides };
+  if (node.loc) result.loc = node.loc;
+  return result;
+}
+
 function collectMacros(node) {
   const macros = new Map();
   if (!node || node.type !== "Program") return macros;
@@ -49,7 +55,7 @@ export function optimize(node) {
       if (node.alt) node.alt = optimize(node.alt);
       if (node.test.type === "Bool") {
         if (node.test.value === true) return node.cons;
-        if (node.test.value === false) return node.alt || { type: "Nil" };
+        if (node.test.value === false) return node.alt || fold(node, { type: "Nil" });
       }
       return node;
     }
@@ -97,13 +103,13 @@ export function optimize(node) {
     case "Unary": {
       node.arg = optimize(node.arg);
       if (node.arg.type === "Num" && node.op === "-") {
-        return { type: "Num", value: -node.arg.value };
+        return fold(node, { type: "Num", value: -node.arg.value });
       }
       if (node.arg.type === "Num" && node.op === "~") {
-        return { type: "Num", value: ~node.arg.value };
+        return fold(node, { type: "Num", value: ~node.arg.value });
       }
       if (node.arg.type === "Bool" && node.op === "!") {
-        return { type: "Bool", value: !node.arg.value };
+        return fold(node, { type: "Bool", value: !node.arg.value });
       }
       return node;
     }
@@ -117,31 +123,31 @@ export function optimize(node) {
 
       if (isBothNum) {
         switch (node.op) {
-          case "+": return { type: "Num", value: node.left.value + node.right.value };
-          case "-": return { type: "Num", value: node.left.value - node.right.value };
-          case "*": return { type: "Num", value: node.left.value * node.right.value };
-          case "/": return { type: "Num", value: node.left.value / node.right.value };
-          case "%": return { type: "Num", value: node.left.value % node.right.value };
-          case "==": return { type: "Bool", value: node.left.value === node.right.value };
-          case "!=": return { type: "Bool", value: node.left.value !== node.right.value };
-          case ">": return { type: "Bool", value: node.left.value > node.right.value };
-          case "<": return { type: "Bool", value: node.left.value < node.right.value };
-          case ">=": return { type: "Bool", value: node.left.value >= node.right.value };
-          case "<=": return { type: "Bool", value: node.left.value <= node.right.value };
-          case "|": return { type: "Num", value: node.left.value | node.right.value };
-          case "&": return { type: "Num", value: node.left.value & node.right.value };
-          case "^": return { type: "Num", value: node.left.value ^ node.right.value };
-          case "<<": return { type: "Num", value: node.left.value << node.right.value };
-          case ">>": return { type: "Num", value: node.left.value >> node.right.value };
+          case "+": return fold(node, { type: "Num", value: node.left.value + node.right.value });
+          case "-": return fold(node, { type: "Num", value: node.left.value - node.right.value });
+          case "*": return fold(node, { type: "Num", value: node.left.value * node.right.value });
+          case "/": return fold(node, { type: "Num", value: node.left.value / node.right.value });
+          case "%": return fold(node, { type: "Num", value: node.left.value % node.right.value });
+          case "==": return fold(node, { type: "Bool", value: node.left.value === node.right.value });
+          case "!=": return fold(node, { type: "Bool", value: node.left.value !== node.right.value });
+          case ">": return fold(node, { type: "Bool", value: node.left.value > node.right.value });
+          case "<": return fold(node, { type: "Bool", value: node.left.value < node.right.value });
+          case ">=": return fold(node, { type: "Bool", value: node.left.value >= node.right.value });
+          case "<=": return fold(node, { type: "Bool", value: node.left.value <= node.right.value });
+          case "|": return fold(node, { type: "Num", value: node.left.value | node.right.value });
+          case "&": return fold(node, { type: "Num", value: node.left.value & node.right.value });
+          case "^": return fold(node, { type: "Num", value: node.left.value ^ node.right.value });
+          case "<<": return fold(node, { type: "Num", value: node.left.value << node.right.value });
+          case ">>": return fold(node, { type: "Num", value: node.left.value >> node.right.value });
         }
       }
 
       if (isBothBool) {
         switch (node.op) {
-          case "==": return { type: "Bool", value: node.left.value === node.right.value };
-          case "!=": return { type: "Bool", value: node.left.value !== node.right.value };
-          case "&&": return { type: "Bool", value: node.left.value && node.right.value };
-          case "||": return { type: "Bool", value: node.left.value || node.right.value };
+          case "==": return fold(node, { type: "Bool", value: node.left.value === node.right.value });
+          case "!=": return fold(node, { type: "Bool", value: node.left.value !== node.right.value });
+          case "&&": return fold(node, { type: "Bool", value: node.left.value && node.right.value });
+          case "||": return fold(node, { type: "Bool", value: node.left.value || node.right.value });
         }
       }
 
@@ -149,8 +155,8 @@ export function optimize(node) {
       if (node.op === "+" && node.left.type === "Num" && node.left.value === 0) return node.right;
       if (node.op === "*" && node.right.type === "Num" && node.right.value === 1) return node.left;
       if (node.op === "*" && node.left.type === "Num" && node.left.value === 1) return node.right;
-      if (node.op === "*" && (node.right.type === "Num" && node.right.value === 0)) return { type: "Num", value: 0 };
-      if (node.op === "*" && (node.left.type === "Num" && node.left.value === 0)) return { type: "Num", value: 0 };
+      if (node.op === "*" && (node.right.type === "Num" && node.right.value === 0)) return fold(node, { type: "Num", value: 0 });
+      if (node.op === "*" && (node.left.type === "Num" && node.left.value === 0)) return fold(node, { type: "Num", value: 0 });
 
       return node;
     }

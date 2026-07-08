@@ -60,7 +60,7 @@ export class SourceMap {
       version: 1,
       mappings: this.mappings,
     };
-    return `\n//# sourceMappingURL=data:application/json;base64,${btoa(JSON.stringify(data))}\n`;
+    return `\n//# sourceMappingURL=data:application/json;base64,${Buffer.from(JSON.stringify(data)).toString("base64")}\n`;
   }
 
   static fromComment(comment, xsLines) {

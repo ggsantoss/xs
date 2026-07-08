@@ -190,6 +190,8 @@ export function compile(ast) {
         emit(OP.OBJECT);
         break;
       }
+    default:
+        throw new Error(`Bytecode compiler: node type "${node.type}" não suportado`);
     }
   }
 }

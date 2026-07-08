@@ -61,7 +61,8 @@ export function generate(node) {
     case "Member":
       return `${generate(node.obj)}.${node.prop}`;
     case "Ident":
-      if (node.name === "SOLTA" || node.name === "FALA") { }
+      if (node.name === "SOLTA") return "console.log";
+      if (node.name === "FALA") return "console.warn";
       return node.name;
     case "Num":
       return String(node.value);

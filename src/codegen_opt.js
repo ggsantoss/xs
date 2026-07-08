@@ -76,7 +76,7 @@ export function generateOpt(node, types = {}, opts = {}) {
       if (callee === "OUVE_AQUI") return `__env(${args})`;
       if (callee === "TAMANHO") return `${args}.length`;
       if (callee === "DIVIDE_TEXTO") return `${args[0]}.split(${args[1]})`;
-      if (callee === "ENCONTRA") return `${args[0]}.match(new RegExp(${args[1]}))`;
+      if (callee === "ENCONTRA") return `${args[0]}.match(${args[1]})`;
       if (callee === "DECODIFICA_URL") return `decodeURIComponent(${args[0]})`;
       if (callee === "JUNTAR") return `${args[0]}.join(${args[1]})`;
       if (callee === "AGORA") return `Date.now()`;
@@ -105,7 +105,12 @@ export function generateOpt(node, types = {}, opts = {}) {
         return `((${l}${op}${r})|0)`;
       }
 
-      if (op === "~=") return `(new RegExp(${r}).test(${l}))`;
+      if (op === "~=") {
+        const escapedR = node.right?.type === "Str"
+          ? JSON.stringify(String(node.right.value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+          : r;
+        return `(new RegExp(${escapedR}).test(${l}))`;
+      }
 
       return `(${l}${op}${r})`;
     }

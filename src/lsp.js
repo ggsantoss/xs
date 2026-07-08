@@ -11,7 +11,7 @@ const KEYWORDS = [
   "AQUI", "VERDADEIRO", "FALSO", "NULO", "TENTA", "PEGA", "ERRO",
   "ASSINCRONO", "VOA", "CONTINUA", "CLASSE", "HERDA", "CONSTRUTOR",
   "ISTO", "NOVA", "METODO", "ESCOLHE", "CASO", "PADRAO", "COMBINA",
-  "CRIA", "SERVIDOR", "PARA", "TAMANHO", "DIVIDE", "TEXTO",
+  "SERVIDOR", "PARA", "TAMANHO", "DIVIDE", "TEXTO",
   "ENCONTRA", "DECODIFICA", "URL", "JUNTAR", "TESTE", "AFIRMA",
   "ASSUNTO", "TAREFA", "MACRO",
 ];
@@ -61,7 +61,13 @@ export async function startLSPServer() {
       const msg = JSON.parse(body);
       handleMessage(msg);
     } catch (e) {
-
+      if (requestId > 0) {
+        sendMessage({
+          jsonrpc: "2.0",
+          id: requestId,
+          error: { code: -32700, message: "Parse error: " + e.message },
+        });
+      }
     }
   });
 
@@ -101,7 +107,7 @@ function handleMessage(msg) {
 
     case "textDocument/didOpen":
     case "textDocument/didChange": {
-      const uri = params.textDocument?.uri || params.textDocument?.uri;
+      const uri = params.textDocument?.uri;
       const text = params.textDocument?.text || params.contentChanges?.[0]?.text;
       if (uri && text) {
         documents.set(uri, text);

@@ -89,6 +89,7 @@ export function lex(input, file = "input.xs") {
 
     if (c === '"' || c === "'") {
       const q = c;
+      const startLoc = loc();
       i++; col++;
       let val = "";
       while (i < input.length && input[i] !== q) {
@@ -96,12 +97,18 @@ export function lex(input, file = "input.xs") {
         else col++;
         val += input[i++];
       }
+      if (i >= input.length) {
+        const err = new Error(`String sem fechamento: faltando ${q}`);
+        err.loc = startLoc;
+        throw err;
+      }
       i++; col++;
       push({ type: "STRING", value: val });
       continue;
     }
 
     if (c === "`") {
+      const startLoc = loc();
       i++; col++;
       let val = "";
       const parts = [];
@@ -121,11 +128,23 @@ export function lex(input, file = "input.xs") {
               expr += input[i++];
             }
           }
+          if (i >= input.length) {
+            const err = new Error(`Template sem fechamento`);
+            err.loc = startLoc;
+            throw err;
+          }
           i++; col++;
           parts.push({ type: "TEMPLATE_EXPR", value: expr });
         } else {
-          val += input[i++]; col++;
+          if (input[i] === "\n") { line++; col = 1; }
+          else col++;
+          val += input[i++];
         }
+      }
+      if (i >= input.length) {
+        const err = new Error(`Template sem fechamento`);
+        err.loc = startLoc;
+        throw err;
       }
       parts.push({ type: "TEMPLATE_STR", value: val });
       i++; col++;
@@ -134,8 +153,21 @@ export function lex(input, file = "input.xs") {
     }
 
     if (c === "/" && input[i + 1] === "/") {
-
       while (i < input.length && input[i] !== "\n") i++;
+      continue;
+    }
+
+    if (c === "/" && input[i + 1] === "*") {
+      i += 2; col += 2;
+      while (i < input.length) {
+        if (input[i] === "*" && input[i + 1] === "/") {
+          i += 2; col += 2;
+          break;
+        }
+        if (input[i] === "\n") { line++; col = 1; }
+        else col++;
+        i++;
+      }
       continue;
     }
 
@@ -158,9 +190,6 @@ export function lex(input, file = "input.xs") {
 
       if (KEYWORDS.has(id)) {
         push({ type: id, value: id });
-      } else if (id.endsWith("?")) {
-
-        push({ type: "IDENT", value: id });
       } else {
         push({ type: "IDENT", value: id });
       }

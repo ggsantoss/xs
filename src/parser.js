@@ -779,8 +779,11 @@ export function parse(tokens) {
 
         if (t.type === "(") {
             let j = i;
-            while (tokens[j] && tokens[j].type !== ")") {
+            let depth = 1;
+            while (tokens[j] && depth > 0) {
                 j++;
+                if (tokens[j]?.type === "(") depth++;
+                if (tokens[j]?.type === ")") depth--;
             }
             if (tokens[j + 1]?.type === "=>") {
                 return parseArrowFunction();

@@ -151,6 +151,7 @@ export function createEnv(baseDir) {
       return exports;
     }
   };
+  builtins.__dir = baseDir;
   return builtins;
 }
 

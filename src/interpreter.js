@@ -121,8 +121,8 @@ export async function interpret(node, env) {
         case "*": return l * r;
         case "/": return l / r;
         case "%": return l % r;
-        case "==": return l == r;
-        case "!=": return l != r;
+        case "==": return l === r;
+        case "!=": return l !== r;
         case ">": return l > r;
         case "<": return l < r;
         case ">=": return l >= r;
@@ -249,7 +249,8 @@ export async function interpret(node, env) {
       }
 
       if (typeof fn !== "function") {
-        const err = notAFunction(node.callee.name || "expressão", node.loc);
+        const name = node.callee.type === "Ident" ? node.callee.name : "expressão";
+        const err = notAFunction(name, node.loc);
         throw err;
       }
       return await fn(...args);

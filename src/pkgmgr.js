@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { createInterface } from "readline";
 import { createGzip } from "zlib";
 import { pipeline } from "stream/promises";
@@ -24,8 +24,9 @@ function getToken() {
     if (fs.existsSync(XS_TOKEN_FILE)) {
       return JSON.parse(fs.readFileSync(XS_TOKEN_FILE, "utf-8"));
     }
-  } catch {}
-  return null;
+  } catch {
+    return null;
+  }
 }
 
 function saveToken(token, user) {
@@ -203,7 +204,6 @@ export async function publishPackage() {
   try {
     const res = await registryFetch(`${XS_REGISTRY}/api/packages`, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${token.token}` },
       body: formData,
     });
     const data = await res.json();
@@ -265,7 +265,14 @@ export async function installPackages(packages) {
   }
 }
 
+function sanitizePkgName(name) {
+  const safe = name.replace(/[^a-z0-9_@./-]/gi, "").replace(/\.\.\//g, "").replace(/\.\.\\/g, "").replace(/^~/g, "");
+  if (!safe || safe !== name) throw new Error(`Invalid package name: ${name}`);
+  return safe;
+}
+
 async function installFromRegistry(name, version) {
+  name = sanitizePkgName(name);
   const distDir = path.join(XS_CACHE_DIR, name);
   if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
 
@@ -364,6 +371,33 @@ async function installFromNpm(name, version) {
 
     const distDir = path.join(XS_CACHE_DIR, name);
     if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
+
+    const tarballUrl = pkgVersion.dist?.tarball;
+    if (tarballUrl) {
+      try {
+        const dlRes = await fetch(tarballUrl);
+        if (dlRes.ok) {
+          const buffer = Buffer.from(await dlRes.arrayBuffer());
+          await extractTarball(buffer, distDir);
+          fs.writeFileSync(
+            path.join(distDir, XS_PACKAGE_FILE),
+            JSON.stringify(
+              {
+                name,
+                version: ver,
+                description: pkgVersion.description || "",
+                main: "src/index.xs",
+              },
+              null,
+              2
+            )
+          );
+          return true;
+        }
+      } catch (e) {
+        console.warn(`   Download failed: ${e.message}, saving metadata only`);
+      }
+    }
 
     fs.writeFileSync(
       path.join(distDir, XS_PACKAGE_FILE),
@@ -497,17 +531,14 @@ async function createTarball(baseDir, files) {
 }
 
 async function extractTarball(buffer, destDir) {
-  // For simplicity, save the tarball and extract metadata
-  // In production, you'd use a proper tar extraction library
   const tgzPath = path.join(destDir, "package.tar.gz");
   fs.writeFileSync(tgzPath, buffer);
-  console.log(`   Saved to ${tgzPath}`);
+  console.log(`   Extraindo para ${destDir}`);
 
-  // Try to extract with system tar if available
   try {
-    execSync(`tar -xzf "${tgzPath}" -C "${destDir}"`, { stdio: "ignore" });
-  } catch {
-    // tar not available, just keep the archive
+    execFileSync("tar", ["-xzf", tgzPath, "-C", destDir], { stdio: "ignore" });
+  } catch (e) {
+    console.warn(`   tar extraction failed (non-critical): ${e.message}`);
   }
 }
 

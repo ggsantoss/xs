@@ -60,7 +60,7 @@ function collectDeclarations(node, ctx) {
           SOLTA_O_GRITO: { jsName: "log", params: "(param i32)", result: "(result i32)" },
           FALA_BAIXO: { jsName: "warn", params: "(param i32)", result: "(result i32)" },
           SORTEIA: { jsName: "randInt", params: "(param i32)(param i32)", result: "(result i32)" },
-          PARSEIA: { jsName: "parseInt", params: "(param i32)", result: "(result i32)" },
+          PARSEIA: { jsName: "parseJSON", params: "(param i32)", result: "(result i32)" },
         };
         ctx.imports.set(name, jsMap[name]);
       }
@@ -152,7 +152,12 @@ function emitWasmCode(node, ctx) {
     case "Ident": {
       if (ctx.vars.has(node.name)) {
         ctx.wasm.push(`    local.get $${node.name}`);
+      } else if (node.name === "VERDADEIRO") {
+        ctx.wasm.push(`    i32.const 1`);
+      } else if (node.name === "FALSO") {
+        ctx.wasm.push(`    i32.const 0`);
       } else {
+        ctx.wasm.push(`    unreachable`);
         ctx.wasm.push(`    i32.const 0`);
       }
       break;
@@ -161,6 +166,29 @@ function emitWasmCode(node, ctx) {
     case "Binary": {
       emitWasmCode(node.left, ctx);
       emitWasmCode(node.right, ctx);
+
+      if (node.op === "&&") {
+        ctx.wasm.push(`    if (result i32)`);
+        emitWasmCode(node.left, ctx);
+        ctx.wasm.push(`    else`);
+        ctx.wasm.push(`      i32.const 0`);
+        ctx.wasm.push(`    end`);
+        ctx.wasm.push(`    if (result i32)`);
+        emitWasmCode(node.right, ctx);
+        ctx.wasm.push(`    else`);
+        ctx.wasm.push(`      i32.const 0`);
+        ctx.wasm.push(`    end`);
+        break;
+      }
+      if (node.op === "||") {
+        emitWasmCode(node.left, ctx);
+        ctx.wasm.push(`    if (result i32)`);
+        emitWasmCode(node.left, ctx);
+        ctx.wasm.push(`    else`);
+        emitWasmCode(node.right, ctx);
+        ctx.wasm.push(`    end`);
+        break;
+      }
 
       const opMap = {
         "+": "i32.add",
@@ -304,7 +332,7 @@ export function getWasmRuntime() {
     log: (n) => { console.log(n); return n; },
     warn: (n) => { console.warn(n); return n; },
     randInt: (a, b) => Math.floor(Math.random() * (b - a + 1)) + a,
-    parseInt: (s) => parseInt(s) || 0,
+    parseJSON: (s) => { try { return Number(JSON.parse(s)); } catch { return 0; } },
   };
 }
 

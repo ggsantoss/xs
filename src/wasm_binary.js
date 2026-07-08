@@ -506,20 +506,46 @@ function emitWasmExpr(node, bytes, wasm, funcName) {
       const v = wasm.getVar(node.name);
       if (v) {
         bytes.push(OP.LOCAL_GET, v.index);
+      } else if (node.name === "VERDADEIRO") {
+        bytes.push(OP.I32_CONST, 1);
+      } else if (node.name === "FALSO") {
+        bytes.push(OP.I32_CONST, 0);
       } else {
+        bytes.push(OP.UNREACHABLE);
         bytes.push(OP.I32_CONST, 0);
       }
       break;
     }
 
     case "Binary": {
+      if (node.op === "&&") {
+        emitWasmExpr(node.left, bytes, wasm, funcName);
+        bytes.push(OP.I32_EQZ);
+        bytes.push(OP.IF, 0x7f);
+        bytes.push(OP.DROP);
+        bytes.push(OP.I32_CONST, 0);
+        bytes.push(OP.ELSE);
+        bytes.push(OP.DROP);
+        emitWasmExpr(node.right, bytes, wasm, funcName);
+        bytes.push(OP.END);
+        break;
+      }
+      if (node.op === "||") {
+        emitWasmExpr(node.left, bytes, wasm, funcName);
+        bytes.push(OP.I32_EQZ);
+        bytes.push(OP.IF, 0x7f);
+        bytes.push(OP.DROP);
+        emitWasmExpr(node.right, bytes, wasm, funcName);
+        bytes.push(OP.ELSE);
+        bytes.push(OP.END);
+        break;
+      }
       const opMap = {
         "+": OP.I32_ADD, "-": OP.I32_SUB, "*": OP.I32_MUL,
         "/": OP.I32_DIV_S, "%": OP.I32_REM_S,
         "==": OP.I32_EQ, "!=": OP.I32_NE,
         ">": OP.I32_GT_S, "<": OP.I32_LT_S,
         ">=": OP.I32_GE_S, "<=": OP.I32_LE_S,
-        "&&": OP.I32_AND, "||": OP.I32_OR,
         "|": OP.I32_OR, "&": OP.I32_AND, "^": OP.I32_XOR,
         "<<": OP.I32_SHL, ">>": OP.I32_SHR_S,
       };

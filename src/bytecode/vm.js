@@ -1,5 +1,23 @@
 import { OP } from "./opcodes.js";
 
+class VMError extends Error {
+  constructor(msg) {
+    super(msg);
+    this.name = "VMError";
+  }
+}
+
+function pop(stack) {
+  if (stack.length === 0) throw new VMError("VM stack underflow");
+  return stack.pop();
+}
+
+function popN(stack, n) {
+  const vals = [];
+  for (let i = 0; i < n; i++) vals.unshift(pop(stack));
+  return vals;
+}
+
 export function run(code) {
   const stack = [];
   const globals = {};
@@ -18,136 +36,137 @@ export function run(code) {
         break;
 
       case OP.LOAD:
+        if (!(arg in globals)) throw new VMError(`Variável "${arg}" não declarada`);
         stack.push(globals[arg]);
         break;
 
       case OP.STORE: {
-        const val = stack.pop();
+        const val = pop(stack);
         globals[arg] = val;
         last = val;
         break;
       }
 
       case OP.ADD: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a + b);
         break;
       }
 
       case OP.SUB: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a - b);
         break;
       }
 
       case OP.MUL: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a * b);
         break;
       }
 
       case OP.DIV: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a / b);
         break;
       }
 
       case OP.MOD: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a % b);
         break;
       }
 
       case OP.EQ: {
-        const b = stack.pop();
-        const a = stack.pop();
-        stack.push(a == b);
+        const b = pop(stack);
+        const a = pop(stack);
+        stack.push(a === b);
         break;
       }
 
       case OP.NEQ: {
-        const b = stack.pop();
-        const a = stack.pop();
-        stack.push(a != b);
+        const b = pop(stack);
+        const a = pop(stack);
+        stack.push(a !== b);
         break;
       }
 
       case OP.LT: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a < b);
         break;
       }
 
       case OP.GT: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a > b);
         break;
       }
 
       case OP.LTE: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a <= b);
         break;
       }
 
       case OP.GTE: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a >= b);
         break;
       }
 
       case OP.NOT: {
-        const a = stack.pop();
+        const a = pop(stack);
         stack.push(!a);
         break;
       }
 
       case OP.BIT_OR: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a | b);
         break;
       }
 
       case OP.BIT_AND: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a & b);
         break;
       }
 
       case OP.BIT_XOR: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a ^ b);
         break;
       }
 
       case OP.BIT_SHL: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a << b);
         break;
       }
 
       case OP.BIT_SHR: {
-        const b = stack.pop();
-        const a = stack.pop();
+        const b = pop(stack);
+        const a = pop(stack);
         stack.push(a >> b);
         break;
       }
 
       case OP.BIT_NOT: {
-        const a = stack.pop();
+        const a = pop(stack);
         stack.push(~a);
         break;
       }
@@ -157,7 +176,7 @@ export function run(code) {
         continue;
 
       case OP.JMPF: {
-        const val = stack.pop();
+        const val = pop(stack);
         if (!val) {
           ip = arg;
           continue;
@@ -166,7 +185,7 @@ export function run(code) {
       }
 
       case OP.JMPT: {
-        const val = stack.pop();
+        const val = pop(stack);
         if (val) {
           ip = arg;
           continue;
@@ -175,34 +194,34 @@ export function run(code) {
       }
 
       case OP.SWAP: {
-        const a = stack.pop();
-        const b = stack.pop();
+        const a = pop(stack);
+        const b = pop(stack);
         stack.push(a);
         stack.push(b);
         break;
       }
 
       case OP.CALL: {
-        const fn = stack.pop();
-        const args = [];
-        for (let i = 0; i < arg; i++) {
-          args.unshift(stack.pop());
-        }
+        const fn = pop(stack);
+        const args = popN(stack, arg);
+        if (typeof fn !== "function") throw new VMError(`Chamada a não-função: ${typeof fn}`);
         last = fn(...args);
         stack.push(last);
         break;
       }
 
       case OP.MEMBER: {
-        const prop = stack.pop();
-        const obj = stack.pop();
+        const prop = pop(stack);
+        const obj = pop(stack);
+        if (obj == null) throw new VMError(`Cannot access property of ${obj}`);
         stack.push(obj[prop]);
         break;
       }
 
       case OP.INDEX: {
-        const idx = stack.pop();
-        const obj = stack.pop();
+        const idx = pop(stack);
+        const obj = pop(stack);
+        if (obj == null) throw new VMError(`Cannot index ${obj}`);
         stack.push(obj[idx]);
         break;
       }
@@ -210,7 +229,7 @@ export function run(code) {
       case OP.ARRAY: {
         const arr = [];
         for (let i = 0; i < arg; i++) {
-          arr.unshift(stack.pop());
+          arr.unshift(pop(stack));
         }
         stack.push(arr);
         break;
@@ -221,7 +240,7 @@ export function run(code) {
         const obj = {};
         const pairs = [];
         for (let i = 0; i < total; i++) {
-          pairs.unshift(stack.pop());
+          pairs.unshift(pop(stack));
         }
         for (let i = 0; i < pairs.length; i += 2) {
           obj[pairs[i]] = pairs[i + 1];
@@ -231,19 +250,13 @@ export function run(code) {
       }
 
       case OP.PRINT: {
-        const vals = [];
-        for (let i = 0; i < arg; i++) {
-          vals.unshift(stack.pop());
-        }
+        const vals = popN(stack, arg);
         console.log(...vals);
         break;
       }
 
       case OP.WARN: {
-        const vals = [];
-        for (let i = 0; i < arg; i++) {
-          vals.unshift(stack.pop());
-        }
+        const vals = popN(stack, arg);
         console.warn(...vals);
         break;
       }

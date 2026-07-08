@@ -3,7 +3,7 @@ import path from "path";
 import { lex } from "./lexer.js";
 import { parse } from "./parser.js";
 import { optimize } from "./optimizer.js";
-import { interpret, AssertionError } from "./interpreter.js";
+import { interpret, AssertionError, ReturnSignal, BreakSignal, ContinueSignal } from "./interpreter.js";
 import { createEnv } from "./runtime.js";
 import { setSource, XSError } from "./errors.js";
 
@@ -92,6 +92,9 @@ export async function runTestFile(code, filePath) {
     ast = optimize(ast);
     await interpret(ast, env);
   } catch (e) {
+    if (e instanceof ReturnSignal || e instanceof BreakSignal || e instanceof ContinueSignal) {
+      throw e;
+    }
     if (!(e instanceof AssertionError)) {
       results.push({ name: "Erro no arquivo", passed: false, error: e.message });
     }
