@@ -1,5 +1,3 @@
-import { lex } from "./lexer.js";
-import { parse } from "./parser.js";
 import * as A from "./ast.js";
 
 export function expandMacros(node, macros) {

@@ -7,8 +7,8 @@ import os from "os";
 import { lex } from "./lexer.js";
 import { parse } from "./parser.js";
 import { optimize } from "./optimizer.js";
-import { interpret, setTabelas } from "./interpreter.js";
-import { setSource, XSError, formatError } from "./errors.js";
+import { interpret, TABELAS } from "./interpreter.js";
+import { setSource, XSError } from "./errors.js";
 import { criarRepositorio } from "./orm.js";
 
 const CACHE = new Map();

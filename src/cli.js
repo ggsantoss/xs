@@ -9,7 +9,7 @@ import { parse } from "./parser.js";
 import { optimize } from "./optimizer.js";
 import { generate } from "./codegen.js";
 import { setSource, XSError, formatError } from "./errors.js";
-import { interpret, AssertionError } from "./interpreter.js";
+import { interpret } from "./interpreter.js";
 import { createEnv } from "./runtime.js";
 import { fileURLToPath } from "url";
 
@@ -24,7 +24,7 @@ try {
 const [, , cmd, ...rest] = process.argv;
 
 const HELP = `
-XanaScript CLI — v2.0
+XanaScript CLI — v2.2.8
   xs run <file>          Executa .xs (AST Interpreter)
   xs vm  <file>          Executa .xs (Bytecode VM)
   xs fmt <file>          Formata .xs

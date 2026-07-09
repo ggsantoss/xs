@@ -1,20 +1,10 @@
-
-
-
-
-
-
-
-
-
-
 import { execSync } from "child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PKG_VERSION = "2.0.0";
+const PKG_VERSION = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8")).version;
 const ROOT = join(__dirname, "..");
 
 async function main() {
@@ -35,22 +25,12 @@ async function main() {
     process.exit(1);
   }
 
-  
-  
-  
-
-  const entryContent = `
-import "./src/cli.js";
-`;
+  const entryContent = `import "./src/cli.js";\n`;
   const entryFile = join(ROOT, "_xs_entry.mjs");
   writeFileSync(entryFile, entryContent, "utf-8");
 
-  
-  
-  
-
   if (hasBun) {
-    console.log("\n🐰 Bun detectado. Gerando binário nativo...\n");
+    console.log("\nBun detectado. Gerando binário nativo...\n");
 
     const plat = process.platform;
     const arch = process.arch;
@@ -60,36 +40,27 @@ import "./src/cli.js";
     try {
       execSync(
         `bun build "${entryFile}" --compile --target=bun-${plat}-${arch} --outfile "${outPath}"`,
-        {
-          stdio: "inherit",
-          cwd: ROOT,
-          timeout: 120000,
-        }
+        { stdio: "inherit", cwd: ROOT, timeout: 120000 }
       );
-      console.log(`  ✓ ${outName} (${plat} ${arch})`);
-      console.log(`  📁 ${outPath}`);
+      console.log(`  OK ${outName} (${plat} ${arch})`);
+      console.log(`  ${outPath}`);
 
-      
       console.log(`\n  Testando...`);
       try {
         const helpOut = execSync(`"${outPath}" help`, { cwd: ROOT, encoding: "utf-8", timeout: 5000 });
         if (helpOut.includes("XanaScript")) {
-          console.log(`  ✓ Binário funcional!`);
+          console.log(`  OK Binario funcional!`);
         }
       } catch (e) {
-        console.log(`  ⚠ Teste: ${e.message}`);
+        console.log(`  Teste: ${e.message}`);
       }
     } catch (e) {
-      console.error(`  ✗ bun build: ${e.message}`);
+      console.error(`  ERRO bun build: ${e.message}`);
     }
   }
 
-  
-  
-  
-
   if (hasPkg) {
-    console.log("\n📦 Pkg detectado. Gerando binários multiplataforma...\n");
+    console.log("\nPkg detectado. Gerando binarios multiplataforma...\n");
 
     const targets = [
       { target: "node18-win-x64", ext: ".exe", platform: "Windows x64" },
@@ -100,31 +71,26 @@ import "./src/cli.js";
 
     for (const t of targets) {
       const outName = `xs-${t.platform.toLowerCase().replace(/\s+/g, "-")}${t.ext}`;
-      console.log(`  → ${t.platform}...`);
+      console.log(`  -> ${t.platform}...`);
       try {
         execSync(
           `npx pkg "${entryFile}" --targets ${t.target} --output "${join(distDir, outName)}"`,
           { stdio: "inherit", cwd: ROOT, timeout: 120000 }
         );
-        console.log(`  ✓ ${outName}`);
+        console.log(`  OK ${outName}`);
       } catch (e) {
-        console.error(`  ✗ ${t.platform}: ${e.message}`);
+        console.error(`  ERRO ${t.platform}: ${e.message}`);
       }
     }
   }
 
-  
-  
-  
-
   try { execSync(`rm -f "${entryFile}"`, { stdio: "ignore" }); } catch {}
   try { execSync(`del "${entryFile}"`, { stdio: "ignore" }); } catch {}
   try { execSync(`del "${entryFile.replace("/", "\\")}"`, { stdio: "ignore" }); } catch {}
-  
-  try { require("fs").unlinkSync(entryFile); } catch {}
+  try { unlinkSync(entryFile); } catch {}
 
-  console.log("\n✅ Build concluído!");
-  console.log(`  Binários em: ${distDir}`);
+  console.log("\nBuild concluido!");
+  console.log(`  Binarios em: ${distDir}`);
   console.log("");
   console.log("  Uso:");
   console.log(`  ${join(distDir, "xs")} help`);
@@ -132,7 +98,7 @@ import "./src/cli.js";
   console.log(`  ${join(distDir, "xs")} build --wasm app.xs`);
   console.log(`  ${join(distDir, "xs")} lsp`);
   console.log("");
-  console.log("  VS Code: instale vscode-xs/ como extensão local");
+  console.log("  VS Code: https://github.com/xanascr/xs-vscode");
 }
 
 async function commandExists(cmd) {

@@ -1,5 +1,5 @@
 import { criarRepositorio } from "./orm.js";
-import { XSError, typeMismatch, undefinedVar, notAFunction } from "./errors.js";
+import { XSError, undefinedVar, notAFunction } from "./errors.js";
 
 export class ReturnSignal {
   constructor(value) {
@@ -17,11 +17,7 @@ export class AssertionError extends Error {
   }
 }
 
-let TABELAS = {};
-
-export function setTabelas(t) {
-  TABELAS = t;
-}
+export let TABELAS = {};
 
 export async function interpret(node, env) {
   switch (node.type) {

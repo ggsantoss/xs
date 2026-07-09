@@ -6,7 +6,6 @@ export function generateOpt(node, types = {}, opts = {}) {
     case "Program": {
       const body = node.body.filter(s => s.type !== "ExportStmt");
       return body.map(n => {
-        sm(n.loc?.start?.line);
         return generateOpt(n, types, opts);
       }).join("\n");
     }

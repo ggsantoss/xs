@@ -76,8 +76,6 @@ export function generate(node) {
       return `[${node.items.map(generate).join(",")}]`;
     case "ObjectExpr":
       return `{${node.props.map(p => `${p.key}:${generate(p.value)}`).join(",")}}`;
-    case "Member":
-      return `${generate(node.obj)}.${node.prop}`;
     case "IndexExpr":
       return `${generate(node.obj)}[${generate(node.index)}]`;
     case "ImportExpr":

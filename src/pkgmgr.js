@@ -1,10 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { execFileSync } from "child_process";
-import { createInterface } from "readline";
 import { createGzip } from "zlib";
-import { pipeline } from "stream/promises";
-import { Readable } from "stream";
+import { createInterface } from "readline";
 
 const XS_REGISTRY = process.env.XS_REGISTRY || "https://xanascript.xyz";
 const XS_CACHE_DIR = path.join(

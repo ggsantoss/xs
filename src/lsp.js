@@ -1,7 +1,12 @@
 import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
 import { lex } from "./lexer.js";
 import { parse } from "./parser.js";
-import { setSource, XSError, formatError } from "./errors.js";
+import { setSource, XSError } from "./errors.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const LSP_VERSION = JSON.parse(fs.readFileSync(resolve(__dirname, "../package.json"), "utf-8")).version;
 
 const KEYWORDS = [
   "PARTIU", "ACABOU", "CRIA", "SE", "LIGA", "SO", "SENAO",
@@ -96,7 +101,7 @@ function handleMessage(msg) {
             definitionProvider: true,
             diagnosticProvider: true,
           },
-          serverInfo: { name: "xanascript-lsp", version: "2.0.0" },
+          serverInfo: { name: "xanascript-lsp", version: LSP_VERSION },
         },
       });
       break;

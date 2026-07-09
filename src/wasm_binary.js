@@ -472,12 +472,7 @@ function emitWasmStmt(node, bytes, wasm, funcName) {
       break;
     }
 
-    case "ExpressionStmt": {
-      emitWasmExpr(node.expression, bytes, wasm, funcName);
-      bytes.push(OP.DROP);
-      break;
     }
-  }
 }
 
 function emitWasmExpr(node, bytes, wasm, funcName) {
